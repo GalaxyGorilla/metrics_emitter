@@ -1,7 +1,7 @@
 metrics_emitter
 =====
 
-An OTP application
+A small test tool to emit metrics to a time series database via exometer.
 
 Build
 -----

@@ -56,8 +56,15 @@ fire_worker(Time) ->
     timer:kill_after(Time, Pid).
 
 setup_metrics() ->
-    ReportOptions = [],
-    ok = exometer_report:add_reporter(exometer_report_tty, ReportOptions),
+    Reporter = exometer_report_influxdb,
+    ReportOptions = [{protocol, http}, 
+                     {host, <<"172.20.16.59">>},
+                     {port, 8086},
+                     {db, <<"test_db">>},
+                     {precision, u},
+                     {tags, [{region, ru}]}],
+
+    ok = exometer_report:add_reporter(Reporter, ReportOptions),
 
     % VM memory.
     % total = processes + system.
@@ -69,7 +76,7 @@ setup_metrics() ->
     ok = exometer:new([erlang, memory],
                       {function, erlang, memory, ['$dp'], value,
                        [total, processes, system, atom, binary, ets]}),
-    ok = exometer_report:subscribe(exometer_report_tty,
+    ok = exometer_report:subscribe(Reporter,
                                    [erlang, memory],
                                    [total, processes, system, atom, binary,
                                     ets], ?INTERVAL),
@@ -79,7 +86,7 @@ setup_metrics() ->
     ok = exometer:new([recon, alloc],
                       {function, recon_alloc, memory, ['$dp'], value,
                        [used, allocated, unused, usage]}),
-    ok = exometer_report:subscribe(exometer_report_tty,
+    ok = exometer_report:subscribe(Reporter,
                                    [recon, alloc],
                                    [used, allocated, unused, usage], ?INTERVAL),
 
@@ -90,7 +97,7 @@ setup_metrics() ->
                        [binary_alloc, driver_alloc, eheap_alloc,
                         ets_alloc, fix_alloc, ll_alloc, sl_alloc,
                         std_alloc, temp_alloc]}),
-    ok = exometer_report:subscribe(exometer_report_tty,
+    ok = exometer_report:subscribe(Reporter,
                                    [recon, alloc, types],
                                    [binary_alloc, driver_alloc, eheap_alloc,
                                     ets_alloc, fix_alloc, ll_alloc, sl_alloc,
@@ -104,7 +111,7 @@ setup_metrics() ->
                       {function, recon, scheduler_usage, [1000], proplist, 
                        Schedulers},
                       [{cache, 5000}]),
-    ok = exometer_report:subscribe(exometer_report_tty,
+    ok = exometer_report:subscribe(Reporter,
                                    [recon, scheduler, usage],
                                    Schedulers, ?INTERVAL),
 
@@ -113,7 +120,7 @@ setup_metrics() ->
     ok = exometer:new([erlang, system],
                       {function, erlang, system_info, ['$dp'], value,
                        [process_count, port_count]}),
-    ok = exometer_report:subscribe(exometer_report_tty,
+    ok = exometer_report:subscribe(Reporter,
                                    [erlang, system],
                                    [process_count, port_count], ?INTERVAL),
 
@@ -121,7 +128,7 @@ setup_metrics() ->
     ok = exometer:new([erlang, statistics],
                       {function, erlang, statistics, ['$dp'], value,
                        [run_queue]}),
-    ok = exometer_report:subscribe(exometer_report_tty,
+    ok = exometer_report:subscribe(Reporter,
                                    [erlang, statistics],
                                    [run_queue], ?INTERVAL).
 

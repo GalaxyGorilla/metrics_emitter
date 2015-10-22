@@ -1,0 +1,18 @@
+{application, 'metrics_emitter',
+ [{description, "A tool to generate and emit metrics for testing purposes."},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {'metrics_emitter_app', []}},
+  {applications,
+   [kernel,
+    stdlib,
+    exometer_core,
+    recon
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {contributors, []},
+  {licenses, []},
+  {links, []}
+ ]}.

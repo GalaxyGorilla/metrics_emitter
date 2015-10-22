@@ -29,7 +29,10 @@ start() ->
     application:ensure_all_started(metrics_emitter).
 
 start(_StartType, _StartArgs) ->
-    ok = setup_metrics(),
+    Reporters = application:get_env(metrics_emitter, reporters, 
+                                    [{exometer_report_tty, []}]),
+    [setup_metrics(Reporter, ReportOptions) 
+     || {Reporter, ReportOptions} <- Reporters],
     Pid = fire(),
     {ok, Pid}.
 
@@ -46,7 +49,8 @@ fire() ->
 
 fire_control() ->
     NumberOfProcesses = trunc(random:uniform() * ?DEFAULT_PROCESS_MAX),
-    ProcessWaitTimes = [trunc(random:uniform() * ?DEFAULT_TIMEOUT) || _ <- lists:seq(1, NumberOfProcesses)],
+    ProcessWaitTimes = [trunc(random:uniform() * ?DEFAULT_TIMEOUT) 
+                        || _ <- lists:seq(1, NumberOfProcesses)],
     [spawn(?MODULE, fire_worker, [Time]) || Time <- ProcessWaitTimes],
     timer:sleep(?DEFAULT_SLEEP),
     fire_control().
@@ -55,14 +59,7 @@ fire_worker(Time) ->
     Pid = spawn(?MODULE, loop, [Time]),
     timer:kill_after(Time, Pid).
 
-setup_metrics() ->
-    Reporter = exometer_report_influxdb,
-    ReportOptions = [{protocol, http}, 
-                     {host, <<"172.20.16.59">>},
-                     {port, 8086},
-                     {db, <<"test_db">>},
-                     {precision, u},
-                     {tags, [{region, ru}]}],
+setup_metrics(Reporter, ReportOptions) ->
 
     ok = exometer_report:add_reporter(Reporter, ReportOptions),
 

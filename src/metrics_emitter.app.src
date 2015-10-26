@@ -1,19 +1,27 @@
 {application, 'metrics_emitter',
- [{description, "A tool to generate and emit metrics for testing purposes."},
-  {vsn, "0.1.0"},
-  {registered, []},
-  {mod, {'metrics_emitter_app', []}},
-  {applications,
-   [kernel,
-    stdlib,
-    exometer_influxdb,
-    exometer_core,
-    recon
-   ]},
-  {env,[]},
-  {modules, []},
+		[{description, "A tool to generate and emit metrics for testing purposes."},
+		{vsn, "0.1.0"},
+				{registered, []},
+				{mod, {'metrics_emitter_app', []}},
+				{applications,
+						[kernel,
+						stdlib,
+								exometer_influxdb,
+								exometer_core,
+								recon
+						]},
+				{env,[
+						{reporters, [{exometer_report_influxdb, [{protocol, http}, 
+											 {host, <<"172.20.16.59">>},
+											 {port, 8086},
+											 {db, <<"test_db">>},
+											 {precision, u},
+											 {tags, [{region, ru}]}]
+									 }]}
+				]},
+				{modules, []},
 
-  {contributors, []},
-  {licenses, []},
-  {links, []}
- ]}.
+				{contributors, []},
+				{licenses, []},
+				{links, []}
+		]}.
